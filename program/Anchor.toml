@@ -1,0 +1,16 @@
+[workspace]
+members = [
+  "programs/loyalty_token_program",
+  "programs/business_registry",
+  "programs/transaction_program",
+]
+
+[provider]
+cluster = "devnet"
+
+[programs.localnet]
+loyalty_token_program = "LoTyTokn111111111111111111111111111111111"
+business_registry = "BizReg1111111111111111111111111111111111111"
+transaction_program = "TxnProg11111111111111111111111111111111111"
+
+

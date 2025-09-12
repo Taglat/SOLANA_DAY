@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "programs/loyalty_token_program",
+    "programs/business_registry",
+    "programs/transaction_program",
+]
+
+

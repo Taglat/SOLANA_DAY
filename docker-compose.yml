@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://user:pass@postgres:5432/loyalty
+      - REDIS_URL=redis://redis:6379/0
+      - SOLANA_RPC_URL=https://api.devnet.solana.com
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - postgres
+      - redis
+
+  frontend-client:
+    build: ./frontend_client
+    ports:
+      - "3000:80"
+    environment:
+      - API_URL=http://localhost:8000
+      - SOLANA_NETWORK=devnet
+    depends_on:
+      - backend
+
+  frontend-seller:
+    build: ./frontend_seller
+    ports:
+      - "3001:80"
+    environment:
+      - API_URL=http://localhost:8000
+      - SOLANA_NETWORK=devnet
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=loyalty
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d loyalty"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+
+volumes:
+  postgres_data:
+
+
