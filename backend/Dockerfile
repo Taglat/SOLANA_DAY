@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /va
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
+COPY test_coffee_system.py /app/
+
 COPY app /app/app
 
 EXPOSE 8000

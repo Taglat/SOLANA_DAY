@@ -1,15 +1,322 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Business Dashboard (Placeholder)</title>
-    <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",sans-serif;margin:0;padding:2rem;}</style>
-  </head>
-  <body>
-    <h1>Business Dashboard</h1>
-    <p>Placeholder UI. React app to be added later.</p>
-  </body>
-  </html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loyalty Platform - Бизнес</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-blue-600">🏪 Бизнес Дашборд</h1>
+                <div class="flex items-center space-x-4">
+                    <div id="business-info" class="hidden">
+                        <span class="text-sm text-gray-600">Бизнес:</span>
+                        <span id="business-name" class="font-semibold text-sm bg-gray-100 px-2 py-1 rounded"></span>
+                    </div>
+                    <button id="login-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        Войти в систему
+                    </button>
+                </div>
+            </div>
+        </header>
 
+        <!-- Analytics Cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">👥 Клиенты</h2>
+                <div class="text-3xl font-bold text-blue-600 mb-2" id="total-customers">0</div>
+                <div class="text-sm text-gray-500">Активных клиентов</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">🪙 Токены</h2>
+                <div class="text-3xl font-bold text-green-600 mb-2" id="tokens-issued">0</div>
+                <div class="text-sm text-gray-500">Выдано токенов</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">💰 Выручка</h2>
+                <div class="text-3xl font-bold text-purple-600 mb-2" id="total-revenue">$0</div>
+                <div class="text-sm text-gray-500">За все время</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">📈 ROI</h2>
+                <div class="text-3xl font-bold text-orange-600 mb-2" id="roi-percentage">0%</div>
+                <div class="text-sm text-gray-500">Программы лояльности</div>
+            </div>
+        </div>
 
+        <!-- Receipt Generation -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">🧾 Генерация чека</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Кошелек клиента</label>
+                    <input type="text" id="customer-wallet" class="w-full border rounded-lg px-3 py-2" placeholder="9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Сумма покупки ($)</label>
+                    <input type="number" id="purchase-amount" class="w-full border rounded-lg px-3 py-2" placeholder="15.50" step="0.01">
+                </div>
+            </div>
+            <button id="generate-receipt" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                Создать чек
+            </button>
+            <div id="receipt-result" class="hidden mt-4 p-4 bg-green-50 rounded-lg">
+                <h3 class="font-semibold text-green-800 mb-2">Чек создан!</h3>
+                <div id="receipt-details" class="text-sm text-green-700"></div>
+                <div id="receipt-qr" class="mt-4 text-center"></div>
+            </div>
+        </div>
+
+        <!-- QR Scanner -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">📱 Сканер QR кодов</h2>
+            <div id="qr-reader" class="mb-4"></div>
+            <div id="scanned-result" class="hidden p-4 bg-green-100 rounded-lg">
+                <h3 class="font-semibold text-green-800">QR код отсканирован!</h3>
+                <div id="scanned-data" class="text-sm text-green-700 mt-2"></div>
+                <button id="process-transaction" class="mt-3 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    Обработать транзакцию
+                </button>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">⚙️ Настройки программы лояльности</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Токенов за $1</label>
+                    <input type="number" id="tokens-per-dollar" class="w-full border rounded-lg px-3 py-2" value="10">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Максимальная скидка (%)</label>
+                    <input type="number" id="max-discount" class="w-full border rounded-lg px-3 py-2" value="30" min="1" max="100">
+                </div>
+            </div>
+            <button id="save-settings" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                Сохранить настройки
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Mock business data
+        let isLoggedIn = false;
+        let businessId = '';
+        let businessName = '';
+
+        // DOM elements
+        const loginBtn = document.getElementById('login-btn');
+        const businessInfo = document.getElementById('business-info');
+        const businessNameSpan = document.getElementById('business-name');
+        const totalCustomers = document.getElementById('total-customers');
+        const tokensIssued = document.getElementById('tokens-issued');
+        const totalRevenue = document.getElementById('total-revenue');
+        const roiPercentage = document.getElementById('roi-percentage');
+        const scannedResult = document.getElementById('scanned-result');
+        const scannedData = document.getElementById('scanned-data');
+        const processTransactionBtn = document.getElementById('process-transaction');
+        const tokensPerDollar = document.getElementById('tokens-per-dollar');
+        const maxDiscount = document.getElementById('max-discount');
+        const saveSettingsBtn = document.getElementById('save-settings');
+        const customerWallet = document.getElementById('customer-wallet');
+        const purchaseAmount = document.getElementById('purchase-amount');
+        const generateReceiptBtn = document.getElementById('generate-receipt');
+        const receiptResult = document.getElementById('receipt-result');
+        const receiptDetails = document.getElementById('receipt-details');
+        const receiptQr = document.getElementById('receipt-qr');
+
+        // Login
+        loginBtn.addEventListener('click', () => {
+            if (!isLoggedIn) {
+                // Mock login
+                businessId = 'business_' + Math.random().toString(36).substr(2, 9);
+                businessName = 'Coffee Shop';
+                isLoggedIn = true;
+                
+                loginBtn.textContent = 'Выйти';
+                loginBtn.className = 'bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700';
+                businessInfo.classList.remove('hidden');
+                businessNameSpan.textContent = businessName;
+                
+                // Initialize dashboard
+                loadAnalytics();
+                initializeQRScanner();
+            } else {
+                // Logout
+                isLoggedIn = false;
+                businessId = '';
+                businessName = '';
+                loginBtn.textContent = 'Войти в систему';
+                loginBtn.className = 'bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700';
+                businessInfo.classList.add('hidden');
+                scannedResult.classList.add('hidden');
+            }
+        });
+
+        // Load analytics
+        function loadAnalytics() {
+            // Mock analytics data
+            totalCustomers.textContent = Math.floor(Math.random() * 100) + 50;
+            tokensIssued.textContent = Math.floor(Math.random() * 10000) + 5000;
+            totalRevenue.textContent = '$' + (Math.random() * 5000 + 1000).toFixed(0);
+            roiPercentage.textContent = (Math.random() * 50 + 20).toFixed(0) + '%';
+        }
+
+        // Initialize QR scanner
+        function initializeQRScanner() {
+            const html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader",
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                false
+            );
+
+            html5QrcodeScanner.render(
+                (decodedText) => {
+                    try {
+                        const data = JSON.parse(decodedText);
+                        scannedData.innerHTML = `
+                            <p><strong>Кошелек:</strong> ${data.wallet_address?.slice(0, 8)}...</p>
+                            <p><strong>Сумма:</strong> $${data.amount_usd}</p>
+                            <p><strong>Тип:</strong> ${data.type}</p>
+                        `;
+                        scannedResult.classList.remove('hidden');
+                    } catch (error) {
+                        console.error('Invalid QR code:', error);
+                        alert('Неверный QR код');
+                    }
+                },
+                (error) => {
+                    // Ignore scanning errors
+                }
+            );
+        }
+
+        // Process transaction
+        processTransactionBtn.addEventListener('click', async () => {
+            try {
+                // Mock transaction processing
+                alert('Транзакция обработана успешно!');
+                scannedResult.classList.add('hidden');
+                loadAnalytics();
+            } catch (error) {
+                console.error('Transaction processing error:', error);
+                alert('Ошибка обработки транзакции');
+            }
+        });
+
+        // Generate receipt
+        generateReceiptBtn.addEventListener('click', async () => {
+            const wallet = customerWallet.value.trim();
+            const amount = parseFloat(purchaseAmount.value);
+
+            if (!wallet || !amount) {
+                alert('Заполните все поля');
+                return;
+            }
+
+            try {
+                // First create a purchase transaction
+                const purchaseResponse = await fetch('http://localhost:8000/api/v1/transactions/purchase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customer_wallet: wallet,
+                        business_id: businessId,
+                        amount_usd: amount
+                    })
+                });
+
+                if (purchaseResponse.ok) {
+                    const transaction = await purchaseResponse.json();
+                    
+                    // Generate receipt
+                    const receiptResponse = await fetch('http://localhost:8000/api/v1/receipts/generate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer mock-token'
+                        },
+                        body: JSON.stringify({
+                            transaction_id: transaction.id,
+                            business_id: businessId,
+                            customer_wallet: wallet,
+                            amount_usd: amount
+                        })
+                    });
+
+                    if (receiptResponse.ok) {
+                        const receipt = await receiptResponse.json();
+                        
+                        // Display receipt details
+                        receiptDetails.innerHTML = `
+                            <p><strong>ID чека:</strong> ${receipt.id}</p>
+                            <p><strong>Сумма:</strong> $${receipt.amount_usd}</p>
+                            <p><strong>Клиент:</strong> ${wallet.slice(0, 8)}...</p>
+                            <p><strong>Действителен до:</strong> ${new Date(receipt.expires_at).toLocaleDateString()}</p>
+                        `;
+
+                        // Generate QR code
+                        const qrData = JSON.parse(receipt.qr_code_data);
+                        QRCode.toCanvas(document.createElement('canvas'), JSON.stringify(qrData), {
+                            width: 200,
+                            margin: 2
+                        }, (err, canvas) => {
+                            if (err) {
+                                console.error('QR generation error:', err);
+                                receiptQr.innerHTML = '<p class="text-red-600">Ошибка генерации QR кода</p>';
+                            } else {
+                                receiptQr.innerHTML = '';
+                                receiptQr.appendChild(canvas);
+                            }
+                        });
+
+                        receiptResult.classList.remove('hidden');
+                        
+                        // Clear form
+                        customerWallet.value = '';
+                        purchaseAmount.value = '';
+                        
+                        // Update analytics
+                        loadAnalytics();
+                    } else {
+                        const error = await receiptResponse.json();
+                        alert(`Ошибка создания чека: ${error.detail}`);
+                    }
+                } else {
+                    const error = await purchaseResponse.json();
+                    alert(`Ошибка создания транзакции: ${error.detail}`);
+                }
+            } catch (error) {
+                console.error('Receipt generation error:', error);
+                alert('Ошибка генерации чека');
+            }
+        });
+
+        // Save settings
+        saveSettingsBtn.addEventListener('click', async () => {
+            try {
+                const settings = {
+                    tokens_per_dollar: parseInt(tokensPerDollar.value),
+                    max_discount_percent: parseInt(maxDiscount.value)
+                };
+
+                // Mock API call
+                console.log('Saving settings:', settings);
+                alert('Настройки сохранены!');
+            } catch (error) {
+                console.error('Settings save error:', error);
+                alert('Ошибка сохранения настроек');
+            }
+        });
+    </script>
+</body>
+</html>
