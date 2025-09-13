@@ -1,0 +1,8 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#4B0082"/>
+  <circle cx="100" cy="100" r="80" fill="#8A2BE2"/>
+  <circle cx="100" cy="100" r="60" fill="#9370DB"/>
+  <circle cx="100" cy="100" r="40" fill="#DDA0DD"/>
+  <text x="100" y="110" text-anchor="middle" font-family="Arial" font-size="24" fill="#4B0082">☕</text>
+  <text x="100" y="140" text-anchor="middle" font-family="Arial" font-size="12" fill="#4B0082">Rare</text>
+</svg>
